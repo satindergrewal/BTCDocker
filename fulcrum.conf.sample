@@ -1,0 +1,68 @@
+# ============================================================================
+# Fulcrum Configuration — Local Electrum SPV Server
+# ============================================================================
+#
+# SETUP:
+#   1. Copy this file: cp fulcrum.conf.sample fulcrum.conf
+#   2. Run: python3 rpcauth.py btcrpc
+#   3. Paste the password below as rpcpassword
+#      (The rpcauth= line goes into bitcoin.conf)
+#   4. Start: docker compose up -d
+#      (data dirs are created automatically inside ./data/)
+#
+# WALLET CONNECTION:
+#   Point your Electrum-compatible wallet to: 127.0.0.1:50001
+#   Only accessible from localhost (bound in docker-compose.yml)
+#
+# WHEN DOES FULCRUM START WORKING?
+#   - Fulcrum needs Bitcoin Core to be fully synced with txindex=1
+#   - It will retry connecting until Bitcoin is ready
+#   - Once Bitcoin is synced, Fulcrum builds its own index (takes hours)
+#   - Monitor: docker compose logs -f fulcrum
+#
+# AFTER BITCOIN SYNC:
+#   - Fulcrum's initial indexing is CPU and I/O heavy
+#   - Lower Bitcoin's dbcache to 1024 to free RAM for Fulcrum
+#
+# ============================================================================
+
+# === Bitcoin Core RPC ===
+# "bitcoin" is the container hostname on the Docker network
+bitcoind = bitcoin:8332
+rpcuser = btcrpc
+# Paste the password from: python3 rpcauth.py btcrpc
+rpcpassword = <PASTE_RPC_PASSWORD_HERE>
+
+# === Data Directory ===
+# Fulcrum's index database — stored at ./data/fulcrum/fulcrum_db on host
+datadir = /data/fulcrum_db
+
+# === Electrum Protocol Listeners ===
+# TCP (unencrypted) — fine for localhost use
+# Bound to 127.0.0.1 on the host via docker-compose.yml
+tcp = 0.0.0.0:50001
+
+# SSL — uncomment and provide cert/key if you want encrypted connections
+# ssl = 0.0.0.0:50002
+# cert = /data/ssl/cert.pem
+# key = /data/ssl/key.pem
+
+# === Performance (16GB RAM, sharing with Bitcoin Core) ===
+# RAM for database in MB — helps speed up initial sync
+db_mem = 2048
+
+# Worker threads for serving wallet requests
+worker-threads = 4
+
+# === Admin RPC ===
+# Admin port for FulcrumAdmin commands (getinfo, clients, query, etc.)
+# Bound to 127.0.0.1 on host via docker-compose.yml — localhost only
+admin = 0.0.0.0:8000
+
+# === Stats HTTP ===
+# Simple status page in browser at http://127.0.0.1:8080
+# Bound to 127.0.0.1 on host via docker-compose.yml — localhost only
+stats = 0.0.0.0:8080
+
+# === Logging ===
+log-level = info

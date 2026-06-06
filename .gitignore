@@ -1,0 +1,14 @@
+.DS_Store
+
+# Blockchain and index data (hundreds of GB)
+data/
+
+# Config files (contain credentials)
+bitcoin.conf
+fulcrum.conf
+
+# VPN config (contains private keys)
+vpn/*.conf
+
+# VPN mode state
+.vpn-mode

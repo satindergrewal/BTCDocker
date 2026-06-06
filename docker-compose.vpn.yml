@@ -1,0 +1,44 @@
+# VPN overlay — adds WireGuard for clearnet traffic
+# Usage: docker compose -f docker-compose.yml -f docker-compose.vpn.yml up -d
+#
+# SETUP: Place your WireGuard config file at vpn/wg0.conf
+#
+# Clearnet peers → VPN SOCKS proxy (1080) → WireGuard → Internet
+# Onion peers    → Tor SOCKS (9050) → Tor network → Internet (direct, no VPN)
+# Two separate pipes. ISP sees VPN + Tor traffic independently.
+
+services:
+  vpn:
+    image: lscr.io/linuxserver/wireguard:latest
+    container_name: btc-vpn
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - IPTABLES_BACKEND=legacy
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+      - net.ipv6.conf.all.disable_ipv6=1
+    volumes:
+      - ./vpn:/config/wg_confs
+    networks:
+      btcnet:
+        ipv4_address: 172.28.0.20
+    healthcheck:
+      test: ["CMD-SHELL", "ip link show wg0 up > /dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  # SOCKS proxy through VPN — at 172.28.0.20:1080
+  # Clearnet Bitcoin traffic routes through this
+  vpn-proxy:
+    build: ./vpn-proxy
+    container_name: btc-vpn-proxy
+    restart: unless-stopped
+    network_mode: "service:vpn"
+    depends_on:
+      vpn:
+        condition: service_healthy

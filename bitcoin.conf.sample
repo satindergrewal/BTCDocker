@@ -1,0 +1,76 @@
+# ============================================================================
+# Bitcoin Core Configuration — Tor-Only, Non-Listening Node
+# ============================================================================
+#
+# SETUP:
+#   1. Copy this file: cp bitcoin.conf.sample bitcoin.conf
+#   2. Run: python3 rpcauth.py btcrpc
+#   3. Paste the rpcauth= line below (replace the placeholder)
+#   4. Paste the password into fulcrum.conf as rpcpassword
+#   5. Start: docker compose up -d
+#      (data dirs are created automatically inside ./data/)
+#
+# AFTER INITIAL SYNC:
+#   - Lower dbcache from 4096 to 1024 to free RAM for Fulcrum
+#   - Then restart: docker compose restart bitcoin
+#
+# SECURITY:
+#   - listen=0: outbound connections only, nobody can connect to this node
+#   - onlynet=onion: all traffic routes through Tor, no clearnet ever
+#   - rpcallowip restricted to Docker network only (172.28.0.0/16)
+#   - RPC uses salted HMAC hash (rpcauth), not plaintext password
+#   - No host ports exposed — RPC only accessible from Fulcrum container
+#
+# INITIAL SYNC WARNING:
+#   - Syncing the full blockchain over Tor takes days to weeks
+#   - Monitor progress: docker compose logs -f bitcoin
+#   - Look for "progress=" in the logs (1.0 = fully synced)
+#
+# ============================================================================
+
+# === Network ===
+# Tor SOCKS5 proxy for onion peers (tor container on port 9050)
+proxy=172.28.0.10:9050
+# Separate proxy for .onion connections (used when VPN handles clearnet)
+#onion=172.28.0.10:9050
+# Only connect to .onion peers — never touches clearnet
+onlynet=onion
+# Don't accept inbound connections — fetch only, don't serve
+listen=0
+
+# Disable DNS seeding (not compatible with onion-only)
+# Bitcoin Core has hardcoded onion seed nodes — no manual seeds needed
+dnsseed=0
+dns=0
+
+# === RPC (for Fulcrum) ===
+server=1
+# Generate with: python3 rpcauth.py btcrpc
+# Then paste the rpcauth= output line below
+rpcauth=<PASTE_RPCAUTH_OUTPUT_HERE>
+# Bind RPC to all interfaces inside the container (Fulcrum connects via Docker network)
+rpcbind=0.0.0.0
+# Only allow RPC from the Docker bridge network (172.28.0.0/16)
+rpcallowip=172.28.0.0/16
+rpcport=8332
+
+# === Performance (16GB RAM machine) ===
+# UTXO cache in MB — 4096 for initial sync, lower to 1024 after sync
+dbcache=4096
+# Max mempool size in MB
+maxmempool=300
+
+# Max outbound connections (no inbound since listen=0)
+maxconnections=40
+# Limit upload to 500MB/day — we're not serving the network
+maxuploadtarget=500
+
+# === Indexing (required for Fulcrum) ===
+# Fulcrum needs full transaction index to serve wallet queries
+txindex=1
+
+# === Logging ===
+# Print to stdout so docker compose logs works
+printtoconsole=1
+# Don't log peer IPs (privacy)
+logips=0

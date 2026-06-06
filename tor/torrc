@@ -1,0 +1,11 @@
+SocksPort 0.0.0.0:9050
+SocksPolicy accept *
+DataDirectory /var/lib/tor
+
+# Use obfs4 bridges to bypass Tor blocking (IPS, firewalls, ISPs)
+UseBridges 1
+ClientTransportPlugin obfs4 exec /usr/bin/obfs4proxy
+
+# obfs4 bridges from https://bridges.torproject.org
+Bridge obfs4 85.121.5.22:9130 9AD05E353AD70C6BA556A5A2E63DFAC6F25E111B cert=lYEsvMr1EKhqhsSPAUm3Gl0Tkwp3ivi74gkNtyGXxUxGwiOBMnNfNOn12+q9akYklPmvYw iat-mode=0
+Bridge obfs4 91.199.84.46:65535 06110A085F7CD3821836DA2CA94C23F667AF8FDE cert=hnQjXaf+oJn8kytronlOyc1SIbgq+S27gogJVYoi0OvRP3v9J6qzCsBb9ACi6GqH8tSzKw iat-mode=0
