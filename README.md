@@ -18,14 +18,16 @@ Bitcoin Core is downloaded directly from `bitcoincore.org` and SHA256 verified d
 
 ## Network modes
 
-| Mode | Command | Chain | Use case |
-|------|---------|-------|----------|
-| Tor onion only | `./btc.sh tor on` | Bitcoin → Tor → Internet | Max privacy, onion peers only |
-| Tor mixed | `./btc.sh tor mixed` | Bitcoin → Tor → Internet | Onion + clearnet peers through Tor |
-| VPN + Tor | `./btc.sh vpn on` | Bitcoin → Tor → VPN → Internet | ISP sees VPN only, peers see onion |
-| VPN + Tor mixed | `./btc.sh tor mixed` (with VPN on) | Bitcoin → Tor → VPN → Internet | Most peers, all traffic hidden |
-| VPN only | `./btc.sh tor off` (with VPN on) | Bitcoin → VPN → Internet | Fast sync, IP hidden by VPN |
-| Direct | `./btc.sh tor off` (no VPN) | Bitcoin → Internet | Fastest, real IP exposed |
+| Mode | Command | Clearnet peers | Onion peers | Use case |
+|------|---------|---------------|-------------|----------|
+| Tor onion only | `./btc.sh tor on` | none | Tor → Internet | Max privacy, onion peers only |
+| Tor mixed | `./btc.sh tor mixed` | Tor → Internet | Tor → Internet | All through Tor, more peers |
+| VPN + Tor mixed | `./btc.sh tor mixed` (with VPN on) | VPN → Internet | Tor → Internet | Two independent pipes, best balance |
+| VPN + Tor onion | `./btc.sh tor on` (with VPN on) | none | Tor → Internet | Onion only, VPN unused |
+| VPN only | `./btc.sh tor off` (with VPN on) | VPN → Internet | none | Fast sync, IP hidden by VPN |
+| Direct | `./btc.sh tor off` (no VPN) | Direct | none | Fastest, real IP exposed |
+
+Tor and VPN are **independent pipes** — Tor traffic never goes through VPN.
 
 ## Security
 
@@ -130,6 +132,7 @@ Stack:
   up        Start all containers
   down      Stop all containers
   nuke      Stop and remove all images
+  repair    Fix corrupted chainstate (after crash/power loss)
   status    Container status
   logs      Tail all logs
   update    Update images (optional: version arg)
