@@ -10,5 +10,8 @@ fulcrum.conf
 # VPN config (contains private keys)
 vpn/*.conf
 
+# Environment file (contains RPC password for mempool)
+.env
+
 # VPN mode state
 .vpn-mode

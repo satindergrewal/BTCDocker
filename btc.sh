@@ -29,6 +29,10 @@ case "${1:-help}" in
     query)      shift; ./fulcrum-admin.sh query "$@" ;;
     stats)      echo "http://127.0.0.1:8080/stats" && open http://127.0.0.1:8080/stats 2>/dev/null || true ;;
 
+    # Mempool Explorer
+    explorer)   echo "http://127.0.0.1:8181" && open http://127.0.0.1:8181 2>/dev/null || true ;;
+    mempoollog) $DC logs -f mempool-backend ;;
+
     # Tor
     torlog)     $DC logs -f tor ;;
     torstatus)  $DC logs tor 2>&1 | grep -i "bootstrapped" | tail -1 ;;
@@ -133,6 +137,10 @@ case "${1:-help}" in
         echo "  clients   Connected wallet clients"
         echo "  query <a> Query an address"
         echo "  stats     Open stats dashboard in browser"
+        echo ""
+        echo "Explorer:"
+        echo "  explorer  Open Mempool block explorer in browser"
+        echo "  mempoollog Tail Mempool backend logs"
         echo ""
         echo "Tor & VPN:"
         echo "  torstatus Tor bootstrap progress (0-100%)"

@@ -13,6 +13,9 @@ Self-contained and portable — put this directory on any machine with Docker an
 | `btc-fulcrum` | Author's image (`cculianu/fulcrum`) | Fulcrum Electrum server — your wallet connects here |
 | `btc-vpn` | linuxserver/wireguard (optional) | WireGuard VPN tunnel |
 | `btc-vpn-proxy` | Ubuntu + microsocks (optional, built locally) | SOCKS5 proxy through VPN for clearnet mode |
+| `btc-mempool-frontend` | mempool/frontend | Mempool block explorer web UI |
+| `btc-mempool-backend` | mempool/backend | Mempool API server |
+| `btc-mempool-db` | mariadb:lts | Mempool database |
 
 Bitcoin Core is downloaded directly from `bitcoincore.org` and SHA256 verified during build.
 
@@ -45,10 +48,11 @@ Tor and VPN are **independent pipes** — Tor traffic never goes through VPN.
 ```bash
 cp bitcoin.conf.sample bitcoin.conf
 cp fulcrum.conf.sample fulcrum.conf
+cp .env.sample .env
 python3 rpcauth.py btcrpc
 ```
 
-Paste the **rpcauth line** into `bitcoin.conf` and the **password** into `fulcrum.conf`.
+Paste the **rpcauth line** into `bitcoin.conf`, the **password** into `fulcrum.conf`, and the same **password** into `.env` (`MEMPOOL_RPC_PASSWORD`).
 
 ### 2. Configure Docker Desktop for auto-start
 
@@ -118,6 +122,10 @@ Fulcrum:
   query <a> Query an address
   stats     Open stats dashboard in browser
 
+Explorer:
+  explorer  Open Mempool block explorer in browser
+  mempoollog Tail Mempool backend logs
+
 Tor & VPN:
   torstatus Tor bootstrap progress (0-100%)
   torlog    Tail Tor logs
@@ -146,6 +154,10 @@ Stack:
 
 Fulcrum only listens on localhost — not accessible from the network.
 
+## Block explorer
+
+Mempool block explorer runs at `http://127.0.0.1:8181` — a local, private version of mempool.space powered by your own node.
+
 ## Updating
 
 ```bash
@@ -173,8 +185,8 @@ Blockchain data in `data/` is preserved in both cases.
 The entire stack is self-contained. To run on a different machine:
 
 1. Copy (or clone) this directory to the target machine
-2. `cp bitcoin.conf.sample bitcoin.conf && cp fulcrum.conf.sample fulcrum.conf`
-3. Generate and paste RPC credentials
+2. `cp bitcoin.conf.sample bitcoin.conf && cp fulcrum.conf.sample fulcrum.conf && cp .env.sample .env`
+3. Generate and paste RPC credentials (into bitcoin.conf, fulcrum.conf, and .env)
 4. `./btc.sh up`
 
 Config files are portable across platforms. Blockchain data in `data/` can be re-synced on the new machine.
@@ -200,7 +212,7 @@ BTCDocker/
 ├── tor/torrc                 # Tor configuration
 ├── fulcrum.conf.sample       # Fulcrum config template
 ├── vpn-proxy/Dockerfile      # SOCKS proxy for VPN clearnet mode (Ubuntu, multi-arch)
-├── .env                      # Data directory paths
+├── .env.sample               # Environment template (copy to .env)
 ├── btc-cli.sh                # Bitcoin CLI wrapper
 ├── fulcrum-admin.sh          # Fulcrum admin wrapper
 ├── update.sh                 # Manual update script (accepts version arg)
