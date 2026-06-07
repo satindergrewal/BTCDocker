@@ -38,12 +38,12 @@ services:
       - ${FULCRUM_DATA_DIR:-./data/fulcrum}:/data
       - ./fulcrum.conf:/etc/fulcrum/fulcrum.conf:ro
     ports:
-      # Electrum TCP port exposed to host so wallets can connect
-      - "127.0.0.1:50001:50001"
-      # Admin RPC — localhost only
+      # Electrum TCP port — wallets connect here
+      - "${BIND_ADDR:-127.0.0.1}:50001:50001"
+      # Admin RPC
       - "127.0.0.1:8000:8000"
-      # Stats HTTP page — localhost only
-      - "127.0.0.1:8080:8080"
+      # Stats HTTP page
+      - "${BIND_ADDR:-127.0.0.1}:8080:8080"
     networks:
       - btcnet
     entrypoint: ["Fulcrum"]
@@ -51,7 +51,7 @@ services:
 
   # === Mempool Block Explorer ===
   mempool-db:
-    image: mariadb:lts
+    image: mariadb:10.11
     container_name: btc-mempool-db
     restart: unless-stopped
     environment:
@@ -99,7 +99,7 @@ services:
       FRONTEND_HTTP_PORT: "8181"
       BACKEND_MAINNET_HTTP_HOST: "btc-mempool-backend"
     ports:
-      - "127.0.0.1:8181:8181"
+      - "${BIND_ADDR:-127.0.0.1}:8181:8181"
     networks:
       - btcnet
 
